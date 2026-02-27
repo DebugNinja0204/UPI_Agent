@@ -1,0 +1,166 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Dispute {{ dispute.id }} | Dashboard{% endblock %}
+
+{% block content %}
+  <div class="hero fade-in">
+    <div class="d-flex flex-wrap align-items-center justify-content-between">
+      <div style="position: relative; z-index: 1;">
+        <h1 class="h2 mb-2" style="background: linear-gradient(135deg, #5f259f, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🎯 Dispute #{{ dispute.id }}</h1>
+        <p class="text-muted mb-0"><code style="background: rgba(124, 58, 237, 0.08); padding: 4px 10px; border-radius: 8px; font-size: 0.95rem;">{{ dispute.upi_txn_id }}</code></p>
+      </div>
+      <div class="mt-3 mt-lg-0 d-flex align-items-center gap-2" style="position: relative; z-index: 1;">
+        <span class="stat-pill">{{ dispute.state }}</span>
+        <a class="btn btn-sm btn-outline-secondary" href="/dashboard" style="border-radius: 10px;">← Back</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card card-shadow fade-in">
+        <div class="card-body">
+          <h5 class="card-title" style="color: var(--upi-purple); font-weight: 700; margin-bottom: 20px;">📋 Dispute Information</h5>
+          <div class="row g-3">
+            <div class="col-6"><span style="color: #64748b; font-weight: 500;">State</span></div>
+            <div class="col-6"><span class="badge" style="background: linear-gradient(135deg, #7c3aed, #5f259f);">{{ dispute.state }}</span></div>
+            <div class="col-6"><span style="color: #64748b; font-weight: 500;">Raised By</span></div>
+            <div class="col-6"><strong>{{ dispute.raised_by }}</strong></div>
+            <div class="col-6"><span style="color: #64748b; font-weight: 500;">Reason</span></div>
+            <div class="col-6" style="font-size: 0.9rem;">{{ dispute.reason_code }}</div>
+            <div class="col-6"><span style="color: #64748b; font-weight: 500;">Resolution</span></div>
+            <div class="col-6">{{ dispute.resolution or '-' }}</div>
+            <div class="col-6"><span style="color: #64748b; font-weight: 500;">⏰ SLA Deadline</span></div>
+            <div class="col-6">
+              {% if dispute.sla_deadline_at %}
+                {{ dispute.sla_deadline_at.strftime('%Y-%m-%d %H:%M') }}
+              {% else %}
+                -
+              {% endif %}
+            </div>
+            <div class="col-6"><span style="color: #64748b; font-weight: 500;">🔄 Retry Count</span></div>
+            <div class="col-6"><strong>{{ dispute.retry_count }}</strong></div>
+            <div class="col-6"><span style="color: #64748b; font-weight: 500;">📅 Created At</span></div>
+            <div class="col-6">{{ dispute.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+            <div class="col-6"><span style="color: #64748b; font-weight: 500;">🕒 Updated At</span></div>
+            <div class="col-6">{{ dispute.updated_at.strftime('%Y-%m-%d %H:%M') }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-shadow mt-4 fade-in">
+        <div class="card-body">
+          <h5 class="card-title" style="color: var(--upi-purple); font-weight: 700; margin-bottom: 20px;">💰 Refund Status</h5>
+          {% if latest_refund %}
+            <div class="row">
+              <div class="col-6"><strong>Refund ID</strong></div>
+              <div class="col-6">{{ latest_refund.refund_id }}</div>
+              <div class="col-6"><strong>Status</strong></div>
+              <div class="col-6">{{ latest_refund.status }}</div>
+              <div class="col-6"><strong>Method</strong></div>
+              <div class="col-6">{{ latest_refund.method }}</div>
+              <div class="col-6"><strong>Initiated</strong></div>
+              <div class="col-6">{{ latest_refund.initiated_at.strftime('%Y-%m-%d %H:%M') if latest_refund.initiated_at else '-' }}</div>
+              <div class="col-6"><strong>Completed</strong></div>
+              <div class="col-6">{{ latest_refund.completed_at.strftime('%Y-%m-%d %H:%M') if latest_refund.completed_at else '-' }}</div>
+            </div>
+            {% if latest_refund.failure_reason %}
+              <div class="alert alert-warning mt-3 mb-0">{{ latest_refund.failure_reason }}</div>
+            {% endif %}
+          {% else %}
+            <p class="text-muted mb-0">No refund records.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card card-shadow mt-4 fade-in">
+        <div class="card-body">
+          <h5 class="card-title" style="color: var(--upi-purple); font-weight: 700; margin-bottom: 20px;">⚡ Quick Actions</h5>
+          <div class="d-grid gap-3">
+            <form method="post" action="/api/disputes/{{ dispute.id }}/recheck" data-api-post="true" data-reload="true">
+              <button class="btn btn-outline-primary w-100" type="submit" style="padding: 12px; border-width: 2px;">🔄 Force Recheck</button>
+            </form>
+            <form method="post" action="/api/disputes/{{ dispute.id }}/refund" data-api-post="true" data-reload="true">
+              <button class="btn w-100" type="submit" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 12px; font-weight: 600;">💸 Trigger Refund</button>
+            </form>
+            <form method="post" action="/api/disputes/{{ dispute.id }}/resolve" data-api-post="true" data-json="true" data-reload="true">
+              <div class="mb-2">
+                <label class="form-label small">Resolution</label>
+                <select class="form-select form-select-sm" name="resolution" required>
+                  <option value="">Select resolution</option>
+                  <option value="REFUND">REFUND</option>
+                  <option value="TRANSACTION_SUCCESS">TRANSACTION_SUCCESS</option>
+                  <option value="NO_DEBIT_FOUND">NO_DEBIT_FOUND</option>
+                  <option value="CUSTOMER_DISPUTE">CUSTOMER_DISPUTE</option>
+                </select>
+              </div>
+              <div class="mb-2">
+                <label class="form-label small">Resolution Note</label>
+                <textarea class="form-control form-control-sm" name="note" rows="2" placeholder="Optional"></textarea>
+              </div>
+              <button class="btn btn-outline-dark" type="submit">Mark Resolved</button>
+            </form>
+            <form method="post" action="/api/disputes/{{ dispute.id }}/note" data-api-post="true" data-json="true" data-reload="true">
+              <div class="mb-2">
+                <label class="form-label small">Add Note</label>
+                <textarea class="form-control form-control-sm" name="note" rows="3" placeholder="Add context"></textarea>
+              </div>
+              <button class="btn btn-outline-secondary" type="submit">Add Note</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card card-shadow fade-in">
+        <div class="card-body">
+          <h5 class="card-title" style="color: var(--upi-purple); font-weight: 700; margin-bottom: 20px;">🔍 Verification Timeline</h5>
+          {% if verifications %}
+            <div class="timeline">
+              {% for check in verifications %}
+                <div class="timeline-item">
+                  <h6 class="mb-1" style="font-weight: 600;">Attempt {{ check.attempt_no }} — {{ check.decision }}</h6>
+                  <p class="text-muted small mb-2">
+                    📅 {{ check.checked_at.strftime('%Y-%m-%d %H:%M') }} 
+                    {% if check.confidence_score %}
+                      | 📊 Confidence: <strong>{{ "%.0f"|format(check.confidence_score * 100) }}%</strong>
+                    {% endif %}
+                  </p>
+                  {% if check.error %}
+                    <div class="alert alert-warning py-2 mb-2" style="font-size: 0.9rem;">⚠️ {{ check.error }}</div>
+                  {% endif %}
+                  {% if check.bank_result %}
+                    <p class="small text-muted mb-1" style="font-weight: 600;">🏦 Bank Result</p>
+                    <pre>{{ check.bank_result | tojson(indent=2) }}</pre>
+                  {% endif %}
+                  {% if check.merchant_result %}
+                    <p class="small text-muted mb-1 mt-2" style="font-weight: 600;">🏪 Merchant Result</p>
+                    <pre>{{ check.merchant_result | tojson(indent=2) }}</pre>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted mb-0 text-center py-3">⏳ No verification attempts yet</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card card-shadow mt-4 fade-in">
+        <div class="card-body">
+          <h5 class="card-title" style="color: var(--upi-purple); font-weight: 700; margin-bottom: 20px;">📝 Notes History</h5>
+          {% if notes %}
+            <ul class="list-group list-group-flush">
+              {% for note in notes %}
+                <li class="list-group-item">{{ note }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0">No notes yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

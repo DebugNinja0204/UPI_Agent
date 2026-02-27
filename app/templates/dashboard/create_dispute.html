@@ -1,0 +1,110 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Raise Dispute | Dashboard{% endblock %}
+
+{% block content %}
+  <div class="hero fade-in">
+    <div class="d-flex flex-wrap align-items-center justify-content-between">
+      <div style="position: relative; z-index: 1;">
+        <h1 class="h2 mb-2" style="background: linear-gradient(135deg, #5f259f, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">➕ Raise New Dispute</h1>
+        <p class="text-muted mb-0" style="font-size: 1.05rem;">Submit customer complaints for instant automated verification</p>
+      </div>
+      <div class="mt-3 mt-lg-0" style="position: relative; z-index: 1;">
+        <a class="btn btn-sm btn-outline-secondary" href="/dashboard" style="border-radius: 10px;">← Back to Disputes</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card card-shadow fade-in">
+        <div class="card-body" style="padding: 32px;">
+          <form id="disputeForm" method="post" action="/api/disputes" data-api-post="true" data-json="true">
+            <div class="mb-4">
+              <label for="upi_txn_id" class="form-label" style="font-weight: 600; color: var(--upi-purple);">💳 UPI Transaction ID <span class="text-danger">*</span></label>
+              <input 
+                type="text" 
+                class="form-control form-control-lg" 
+                id="upi_txn_id" 
+                name="upi_txn_id" 
+                placeholder="e.g., UPI-TEST-001" 
+                required
+                style="border-radius: 12px; border: 2px solid rgba(124, 58, 237, 0.2);"
+              >
+              <div class="form-text">The unique transaction identifier from the UPI payment system</div>
+            </div>
+
+            <div class="mb-4">
+              <label for="raised_by" class="form-label" style="font-weight: 600; color: var(--upi-purple);">👤 Raised By <span class="text-danger">*</span></label>
+              <select class="form-select form-select-lg" id="raised_by" name="raised_by" required style="border-radius: 12px; border: 2px solid rgba(124, 58, 237, 0.2);">
+                <option value="">Select who is raising the dispute</option>
+                <option value="CUSTOMER">👤 Customer</option>
+                <option value="MERCHANT">🏪 Merchant</option>
+                <option value="BANK">🏦 Bank</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label for="reason_code" class="form-label" style="font-weight: 600; color: var(--upi-purple);">🔍 Reason Code <span class="text-danger">*</span></label>
+              <select class="form-select form-select-lg" id="reason_code" name="reason_code" required style="border-radius: 12px; border: 2px solid rgba(124, 58, 237, 0.2);">
+                <option value="">Select dispute reason</option>
+                <option value="TRANSACTION_NOT_RECEIVED">❌ Transaction Not Received</option>
+                <option value="DUPLICATE_TRANSACTION">🔄 Duplicate Transaction</option>
+                <option value="WRONG_AMOUNT">💰 Wrong Amount</option>
+                <option value="UNAUTHORIZED_TRANSACTION">🚫 Unauthorized Transaction</option>
+                <option value="PARTIAL_CREDIT">📊 Partial Credit</option>
+                <option value="TRANSACTION_TIMEOUT">⏱️ Transaction Timeout</option>
+                <option value="CUSTOMER_DISPUTE">⚠️ Customer Dispute</option>
+                <option value="OTHER">📝 Other</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label for="notes" class="form-label" style="font-weight: 600; color: var(--upi-purple);">📝 Notes (Optional)</label>
+              <textarea 
+                class="form-control" 
+                id="notes" 
+                name="notes" 
+                rows="4" 
+                placeholder="Additional context, customer complaint details, or supporting information..."
+                style="border-radius: 12px; border: 2px solid rgba(124, 58, 237, 0.2);"
+              ></textarea>
+              <div class="form-text">Provide any additional details that might help with dispute resolution</div>
+            </div>
+
+            <div class="d-grid gap-3">
+              <button type="submit" class="btn btn-primary btn-lg" style="padding: 16px; font-size: 1.1rem; border-radius: 12px;">🚀 Submit Dispute</button>
+              <a href="/dashboard" class="btn btn-outline-secondary btn-lg" style="border-radius: 12px;">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card card-shadow mt-4 fade-in" style="border-left: 4px solid var(--upi-violet);">
+        <div class="card-body">
+          <h5 class="card-title" style="color: var(--upi-purple); font-weight: 700;">🎯 What Happens Next?</h5>
+          <ol class="mb-0" style="line-height: 2;">
+            <li>The dispute enters <strong style="color: var(--upi-violet);">OPEN</strong> state immediately</li>
+            <li>Background agent automatically verifies with bank & merchant systems</li>
+            <li>System decides: <strong style="color: #10b981;">Approve</strong>, <strong style="color: #ef4444;">Reject</strong>, or <strong style="color: #f59e0b;">Manual Review</strong></li>
+            <li>Approved disputes trigger automatic refunds 💰</li>
+            <li>Track real-time progress in the dashboard 📊</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("disputeForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      const form = event.target;
+      submitApiForm(form).then(() => {
+        // Redirect to dashboard on success after a short delay
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1500);
+      });
+    });
+  </script>
+{% endblock %}

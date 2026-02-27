@@ -1,0 +1,89 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Analytics | Dashboard{% endblock %}
+
+{% block content %}
+  <div class="hero fade-in">
+    <div class="d-flex flex-wrap align-items-center justify-content-between">
+      <div style="position: relative; z-index: 1;">
+        <h1 class="h2 mb-2" style="background: linear-gradient(135deg, #5f259f, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">📊 Analytics Dashboard</h1>
+        <p class="text-muted mb-0" style="font-size: 1.05rem;">Real-time insights into dispute resolution performance metrics</p>
+      </div>
+      <div class="mt-3 mt-lg-0" style="position: relative; z-index: 1;">
+        <span class="stat-pill">Live Data</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-6 col-xl-3">
+      <div class="card card-shadow fade-in" style="border-left: 4px solid #7c3aed;">
+        <div class="card-body">
+          <p class="text-muted small mb-1" style="font-weight: 600;">📋 Total Disputes</p>
+          <h3 class="mb-0" style="color: var(--upi-purple); font-weight: 700;">{{ summary.total_disputes }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="card card-shadow fade-in" style="border-left: 4px solid #10b981;">
+        <div class="card-body">
+          <p class="text-muted small mb-1" style="font-weight: 600;">⏱️ Avg Resolution (hrs)</p>
+          <h3 class="mb-0" style="color: #059669; font-weight: 700;">{{ summary.average_resolution_time_hours or '-' }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="card card-shadow fade-in" style="border-left: 4px solid #f59e0b;">
+        <div class="card-body">
+          <p class="text-muted small mb-1" style="font-weight: 600;">💰 Refund Success Rate</p>
+          <h3 class="mb-0" style="color: #d97706; font-weight: 700;">{{ summary.refund_success_rate or '-' }}{% if summary.refund_success_rate is not none %}%{% endif %}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="card card-shadow fade-in" style="border-left: 4px solid #3b82f6;">
+        <div class="card-body">
+          <p class="text-muted small mb-1" style="font-weight: 600;">🔄 Avg Retry Count</p>
+          <h3 class="mb-0" style="color: #2563eb; font-weight: 700;">{{ summary.average_retry_count }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-lg-6">
+      <div class="card card-shadow fade-in">
+        <div class="card-body">
+          <h5 class="card-title" style="color: var(--upi-purple); font-weight: 700; margin-bottom: 20px;">📈 Disputes by State</h5>
+          {% if summary.disputes_by_state %}
+            <div class="row g-3">
+              {% for state, count in summary.disputes_by_state.items() %}
+                <div class="col-sm-6">
+                  <div class="d-flex justify-content-between align-items-center p-3 border rounded" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.03), rgba(79, 70, 229, 0.03)); border-color: rgba(124, 58, 237, 0.2) !important;">
+                    <span style="font-weight: 600;">{{ state }}</span>
+                    <span class="badge" style="background: linear-gradient(135deg, #7c3aed, #5f259f);">{{ count }}</span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted mb-0 text-center py-3">No dispute data available</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-6">
+      <div class="card card-shadow fade-in">
+        <div class="card-body">
+          <h5 class="card-title" style="color: var(--upi-purple); font-weight: 700; margin-bottom: 20px;">🎯 Top Reason</h5>
+          <div class="text-center py-4">
+            <div style="font-size: 3rem;">🔍</div>
+            <h4 class="mt-3" style="color: var(--upi-purple);">{{ summary.most_common_reason_code or 'N/A' }}</h4>
+            <p class="text-muted mb-0">Most frequently disputed issue</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

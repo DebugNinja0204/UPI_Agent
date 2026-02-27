@@ -250,13 +250,6 @@ Contributions welcome! Please:
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 👥 Authors
-
-- **Nisha** - [@DebugNinja0204](https://github.com/DebugNinja0204)
 
 ## 🙏 Acknowledgments
 
@@ -264,12 +257,6 @@ This project is licensed under the MIT License.
 - Flask and SQLAlchemy communities
 - Google Gemini AI team
 
-## 📞 Support
 
-For issues or questions:
-- Open an issue on GitHub
-- Check existing documentation in `/docs` folder
 
----
 
-**Built with ❤️ for automated financial dispute resolution**
